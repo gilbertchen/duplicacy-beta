@@ -41,6 +41,10 @@ func (manager *BackupManager) SetDryRun(dryRun bool) {
 	manager.config.dryRun = dryRun
 }
 
+func (manager *BackupManager) SetSkipOfflineData(skipOfflineData bool) {
+	manager.config.skipOfflineData = skipOfflineData
+}
+
 // CreateBackupManager creates a backup manager using the specified 'storage'.  'snapshotID' is a unique id to
 // identify snapshots created for this repository.  'top' is the top directory of the repository.  'password' is the
 // master key which can be nil if encryption is not enabled.
@@ -188,7 +192,7 @@ func (manager *BackupManager) Backup(top string, quickMode bool, threads int, ta
 	defer DeleteShadowCopy()
 
 	LOG_INFO("BACKUP_INDEXING", "Indexing %s", top)
-	localSnapshot, skippedDirectories, skippedFiles, err := CreateSnapshotFromDirectory(manager.snapshotID, shadowTop, manager.nobackupFile)
+	localSnapshot, skippedDirectories, skippedFiles, err := CreateSnapshotFromDirectory(manager.snapshotID, shadowTop, manager.nobackupFile, manager.config.skipOfflineData)
 	if err != nil {
 		LOG_ERROR("SNAPSHOT_LIST", "Failed to list the directory %s: %v", top, err)
 		return false
@@ -710,7 +714,7 @@ func (manager *BackupManager) Backup(top string, quickMode bool, threads int, ta
 			skipped += " were"
 		}
 
-		skipped += " not included due to access errors"
+		skipped += " not included"
 		LOG_WARN("BACKUP_SKIPPED", skipped)
 	}
 
@@ -760,7 +764,7 @@ func (manager *BackupManager) Restore(top string, revision int, inPlace bool, qu
 	remoteSnapshot := manager.SnapshotManager.DownloadSnapshot(manager.snapshotID, revision)
 	manager.SnapshotManager.DownloadSnapshotContents(remoteSnapshot, patterns, true)
 
-	localSnapshot, _, _, err := CreateSnapshotFromDirectory(manager.snapshotID, top, manager.nobackupFile)
+	localSnapshot, _, _, err := CreateSnapshotFromDirectory(manager.snapshotID, top, manager.nobackupFile, false)
 	if err != nil {
 		LOG_ERROR("SNAPSHOT_LIST", "Failed to list the repository: %v", err)
 		return false

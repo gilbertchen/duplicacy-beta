@@ -65,9 +65,10 @@ type Config struct {
 	// for encrypting a non-chunk file
 	FileKey []byte `json:"-"`
 
-	chunkPool      chan *Chunk
-	numberOfChunks int32
-	dryRun         bool
+	chunkPool       chan *Chunk
+	numberOfChunks  int32
+	dryRun          bool
+	skipOfflineData bool
 }
 
 // Create an alias to avoid recursive calls on Config.MarshalJSON

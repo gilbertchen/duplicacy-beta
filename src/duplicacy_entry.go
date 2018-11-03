@@ -443,7 +443,7 @@ func (files FileInfoCompare) Less(i, j int) bool {
 
 // ListEntries returns a list of entries representing file and subdirectories under the directory 'path'.  Entry paths
 // are normalized as relative to 'top'.  'patterns' are used to exclude or include certain files.
-func ListEntries(top string, path string, fileList *[]*Entry, patterns []string, nobackupFile string, discardAttributes bool) (directoryList []*Entry,
+func ListEntries(top string, path string, fileList *[]*Entry, patterns []string, nobackupFile string, discardAttributes bool, skipOfflineData bool) (directoryList []*Entry,
 	skippedFiles []string, err error) {
 
 	LOG_DEBUG("LIST_ENTRIES", "Listing %s", path)
@@ -523,6 +523,12 @@ func ListEntries(top string, path string, fileList *[]*Entry, patterns []string,
 
 		if f.Mode()&(os.ModeNamedPipe|os.ModeSocket|os.ModeDevice) != 0 {
 			LOG_WARN("LIST_SKIP", "Skipped non-regular file %s", entry.Path)
+			skippedFiles = append(skippedFiles, entry.Path)
+			continue
+		}
+
+		if skipOfflineData && entry.IsOffline(f) {
+			LOG_INFO("LIST_SKIP", "Skipped offline file %s", entry.Path)
 			skippedFiles = append(skippedFiles, entry.Path)
 			continue
 		}

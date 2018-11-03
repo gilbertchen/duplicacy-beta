@@ -1296,7 +1296,7 @@ func (manager *SnapshotManager) Diff(top string, snapshotID string, revisions []
 	if len(revisions) <= 1 {
 		// Only scan the repository if filePath is not provided
 		if len(filePath) == 0 {
-			rightSnapshot, _, _, err = CreateSnapshotFromDirectory(snapshotID, top, nobackupFile)
+			rightSnapshot, _, _, err = CreateSnapshotFromDirectory(snapshotID, top, nobackupFile, false)
 			if err != nil {
 				LOG_ERROR("SNAPSHOT_LIST", "Failed to list the directory %s: %v", top, err)
 				return false

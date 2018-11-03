@@ -83,3 +83,6 @@ func (entry *Entry) SetAttributesToFile(fullPath string) {
 	}
 
 }
+func (entry *Entry) IsOffline(fileInfo os.FileInfo) bool {
+	return false
+}

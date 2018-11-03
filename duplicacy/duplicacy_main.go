@@ -716,12 +716,14 @@ func backupRepository(context *cli.Context) {
 	dryRun := context.Bool("dry-run")
 	uploadRateLimit := context.Int("limit-rate")
 	enumOnly := context.Bool("enum-only")
+	skipOfflineData := context.Bool("skip-offline-data")
 	storage.SetRateLimits(0, uploadRateLimit)
 	backupManager := duplicacy.CreateBackupManager(preference.SnapshotID, storage, repository, password, preference.NobackupFile)
 	duplicacy.SavePassword(*preference, "password", password)
 
 	backupManager.SetupSnapshotCache(preference.Name)
 	backupManager.SetDryRun(dryRun)
+	backupManager.SetSkipOfflineData(skipOfflineData)
 	backupManager.Backup(repository, quickMode, threads, context.String("t"), showStatistics, enableVSS, vssTimeout, enumOnly)
 
 	runScript(context, preference.Name, "post")
@@ -1417,6 +1419,10 @@ func main() {
 				cli.BoolFlag{
 					Name:  "enum-only",
 					Usage: "enumerate the repository recursively and then exit",
+				},
+				cli.BoolFlag{
+					Name:  "skip-offline-data",
+					Usage: "skip directories and files that are offline",
 				},
 			},
 			Usage:     "Save a snapshot of the repository to the storage",
