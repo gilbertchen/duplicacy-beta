@@ -31,7 +31,6 @@ const (
 
 // FossilCollection contains fossils and temporary files found during a snapshot deletions.
 type FossilCollection struct {
-
 	// At what time the fossil collection was finished
 	EndTime int64 `json:"end_time"`
 
@@ -182,7 +181,6 @@ func getDaysBetween(start int64, end int64) int {
 
 // SnapshotManager is mainly responsible for downloading, and deleting snapshots.
 type SnapshotManager struct {
-
 	// These are variables shared with the backup manager
 	config        *Config
 	storage       Storage
@@ -1818,6 +1816,15 @@ func (manager *SnapshotManager) PruneSnapshots(selfID string, snapshotID string,
 
 	defer func() {
 		if logFile != nil {
+
+			// in case nothing was pruned, the log file is empty.
+			// write in the logfile that "nothing was pruned"
+			if stats, e := logFile.Stat(); e == nil {
+				if stats.Size() <= int64(2) {
+					fmt.Fprintf(logFile, "No snapshots or chunks to be pruned in this run")
+				}
+			}
+
 			cerr := logFile.Close()
 			if cerr != nil {
 				LOG_WARN("LOG_FILE", "Could not close log file %s: %v", logFileName, cerr)
